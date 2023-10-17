@@ -1,12 +1,9 @@
-# source: https://vgel.me/posts/handmade-transformer
-
-# Model ops from https://github.com/jaymody/picoGPT/blob/main/gpt2.py (MIT license)
-
+#run with 'python3 2heads-handmade-transformer.py'
 
 import numpy as np
 N_CTX = 5
 N_VOCAB = 2
-N_HEAD_DIM = 9 # want this to be the same so each head can store position + encoding info. 
+N_HEAD_DIM = 9 
 N_HEADS = 2
 N_EMBED = 9
 ATTN_SIZE = N_HEADS * N_HEAD_DIM
@@ -17,30 +14,14 @@ def softmax(x):
     return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
 
 def attention(i, q, k, v):
-
-    '''
-    if i == 1:
-        print("q = \n", q)
-        print("k = \n", k)
-        print("k.T = \n", k.T)
-        print(f"q @ k.T {i} =\n", (q @ k.T) )
-        
-        print(f"attn scores {i} =\n", softmax((q @ k.T) ) )
-        print(f"v {i} = \n", v)
-    '''
-
     return softmax((q @ k.T) ) @ v
 
 def gpt(inputs, wte, wpe, c_attn, c_proj):
-
     x = wte[inputs] + wpe[range(len(inputs))]  
-    #print("x = \n", x)
-  
     q = x @ c_attn['q']
     k = x @ c_attn['k']
     v = x @ c_attn['v']
     
-
     q_heads = np.split(q, N_HEADS, axis=-1)
     k_heads = np.split(k, N_HEADS, axis=-1)
     v_heads = np.split(v, N_HEADS, axis=-1)
@@ -50,31 +31,10 @@ def gpt(inputs, wte, wpe, c_attn, c_proj):
     
     attn0 = attn_out[0] @ c_proj_heads[0] + c_proj['b'] 
     attn1 = attn_out[1] @ c_proj_heads[1] + c_proj['b'] 
-
-    
-    '''
-    print(f"attn_out 0 =\n", attn_out[0])
-    print("0: attn_out @ c_proj + bias = \n", attn0)
-    print("head 0 pred = \n", attn0 @ wte.T)
-    
-
-    print(f"q[1[1].T  =\n", (q_heads[1] @ k_heads[1].T) )
-    print(f"attn_out 1 =\n", attn_out[1])
-    print("1: attn_out @ c_proj + bias = \n", attn1)
-    print("head 1 pred (attn1 @ wte.T)= \n", attn1 @ wte.T)
-   '''
-   
-
-
     attn = attn0 + attn1
-    #print("attn0 + attn1 = \n", attn)
+    
     x = x + attn 
-
-    #print(x @ wte.T)
-
     return x @ wte.T 
-
-
 
 MODEL = {
     "wte": np.array(
@@ -108,11 +68,6 @@ MODEL = {
                 [0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0],
             ]
         ),
-        # aabaa
-        # rule:
-        # if current is 'a'
-        # and 3 ahead is 'a'
-        # print 'b'. 
         "k" : np.array(
             [
                 
@@ -167,7 +122,6 @@ MODEL = {
 }
 
 
-
 CHARS = ["a", "b"]
 def tokenize(s): return [CHARS.index(c) for c in s]
 def untok(tok): return CHARS[tok]
@@ -192,6 +146,5 @@ def complete(s, max_new_tokens=15):
 
 #print("aabaab")
 #predict("aabab")
-
 
 print(complete("aab"))
