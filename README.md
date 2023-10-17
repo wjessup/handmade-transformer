@@ -30,14 +30,9 @@ The combined heads given 'aab' will complete to 'aababaababaababaab', demonstrat
 
 # Other changes
 
-* increased the WPE to have longer context of 6
+* increased the WPE to have longer context of 6, increase head dimension from 8 to 9. 
 
 * unpacked attn matrix into q, k, v matricies and make them their own parts of the model. The packing in the model is for convenience, but it becomes unweildly as we add a 2nd head. This approach is much more clear. 
-
-* removed attn['b'] which was just 0's that didn't do anything, simplified the code a bit
-
-* increase head dimension from 8 to 10. one position is for WTE 'c' and one position is 
-for the increased context size (WPE)
 
 * simplified the MODEL structure a bit
 
